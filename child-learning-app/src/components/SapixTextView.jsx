@@ -34,6 +34,7 @@ const defaultFormState = {
 const initialState = {
   texts: [],
   selectedSubject: '算数',
+  selectedGrade: '4年生',
   showAddForm: false,
   editingId: null,
   viewingPDF: null,
@@ -126,12 +127,14 @@ function SapixTextView({ user }) {
     loadTexts()
   }, [loadTexts])
 
-  // 科目でフィルタリング＋実施日（studyDate）降順ソート
+  // 学年＋科目でフィルタリング＋実施日（studyDate）降順ソート
+  // grade 未設定の旧データは選択学年に関わらず常に表示（移行期間中の事故防止）
   const filteredTexts = useMemo(() =>
     state.texts
       .filter(t => t.subject === state.selectedSubject)
+      .filter(t => !t.grade || t.grade === state.selectedGrade)
       .sort((a, b) => (b.studyDate || '').localeCompare(a.studyDate || '')),
-    [state.texts, state.selectedSubject]
+    [state.texts, state.selectedSubject, state.selectedGrade]
   )
 
   // ファイル名から SAPIX コードを抽出し、addForm にスケジュール情報をパッチする
@@ -430,6 +433,20 @@ function SapixTextView({ user }) {
         </div>
       </div>
 
+      {/* 学年フィルター */}
+      <div className="sapix-grade-filter-row">
+        <label className="sapix-grade-filter-label">学年:</label>
+        {grades.map(grade => (
+          <button
+            key={grade}
+            className={`sapix-grade-btn ${state.selectedGrade === grade ? 'active' : ''}`}
+            onClick={() => dispatch({ type: 'SET_FIELD', field: 'selectedGrade', value: grade })}
+          >
+            {grade}
+          </button>
+        ))}
+      </div>
+
       <div className="view-header">
         <div className="header-title-row">
           <div>
@@ -438,7 +455,21 @@ function SapixTextView({ user }) {
               SAPIXテキスト・プリントをスキャン管理。単元タグ付きでPDF閲覧できます。
             </p>
           </div>
-          <button className="add-pastpaper-btn" onClick={() => dispatch({ type: 'SET_FIELD', field: 'showAddForm', value: !state.showAddForm })}>
+          <button
+            className="add-pastpaper-btn"
+            onClick={() => {
+              if (state.showAddForm) {
+                dispatch({ type: 'SET_FIELD', field: 'showAddForm', value: false })
+              } else {
+                // 開く時、フォームの学年を現在選択中の学年に合わせる
+                // （追加直後に同じタブで見えるようにするため）
+                dispatch({ type: 'SET_FIELDS', fields: {
+                  showAddForm: true,
+                  addForm: { ...state.addForm, grade: state.selectedGrade },
+                }})
+              }
+            }}
+          >
             {state.showAddForm ? '✕ 閉じる' : '+ テキスト追加'}
           </button>
         </div>
