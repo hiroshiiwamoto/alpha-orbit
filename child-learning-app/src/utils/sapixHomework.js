@@ -55,12 +55,12 @@ const HOMEWORK_TEMPLATES = {
       dayOffsets: [4, 5],
       priority: 'B',
     },
-    // --- 毎日 ---
+    // --- 毎日（休講・テスト週・春夏期含めて毎日表示する） ---
     {
       studyPriority: 6,
       studyCategory: 'basic-training',
       title: '基礎力トレーニング',
-      dayOffsets: [0, 1, 2, 3, 4, 5, 6],
+      isDaily: true,
       priority: 'B',
     },
   ],
@@ -239,6 +239,38 @@ function lessonLabelFromCode(code) {
 // テンプレート定義は持たず、SAPIXセッションから直接タスクを構築する。
 const SEASON_DNUMBERS = new Set(['春期', '夏期'])
 
+// 毎日表示する家庭学習タスクを生成
+// 通常授業の有無・休講・テスト週・講習中などに関わらず、
+// horizon 範囲（今日 〜 今日 + DAILY_HORIZON_DAYS）の各日に 1 件出す。
+const DAILY_HORIZON_DAYS = 14
+
+function generateDailyHomework(today, allTasks) {
+  for (const [subject, templates] of Object.entries(HOMEWORK_TEMPLATES)) {
+    for (const template of templates) {
+      if (!template.isDaily) continue
+      for (let i = 0; i <= DAILY_HORIZON_DAYS; i++) {
+        const d = addDays(today, i)
+        const dStr = formatDate(d)
+        allTasks.push({
+          id: `hw-${subject}-${template.studyCategory}-${dStr}`,
+          subject,
+          title: template.title,
+          dueDate: dStr,
+          studyPriority: template.studyPriority,
+          studyCategory: template.studyCategory,
+          priority: template.priority,
+          classDate: null,
+          isHomework: true,
+          textCode: '',
+          lessonLabel: '',
+          unitName: '',
+          unitIds: [],
+        })
+      }
+    }
+  }
+}
+
 function generateSeasonHomework(sessions, today, allTasks) {
   const todayStr = formatDate(today)
   const horizonStr = formatDate(addDays(today, 6))
@@ -271,6 +303,9 @@ export function generateWeeklyHomework(today = new Date()) {
   // 1回の生成中だけセッション一覧を保持（モジュール越しのキャッシュは持たない）
   const sessions = generateSapixSessions()
 
+  // 毎日タスク（基礎力トレーニング等）— 授業の有無に関わらず horizon 範囲を生成
+  generateDailyHomework(today, allTasks)
+
   // 講習期間中の家庭学習（D-番号外のセッションを別ロジックで処理）
   generateSeasonHomework(sessions, today, allTasks)
 
@@ -292,6 +327,8 @@ export function generateWeeklyHomework(today = new Date()) {
       if (!templates) continue
 
       for (const template of templates) {
+        // 毎日タスクは generateDailyHomework で先に処理済みなので skip
+        if (template.isDaily) continue
         // SAPIX カリキュラムから「第N回」「単元名」「テキストコード」を解決
         const textType = textTypeForCategory(subject, template.studyCategory)
         const session = findSession(sessions, classDayStr, subject, textType)
