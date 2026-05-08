@@ -49,6 +49,30 @@ function MasterUnitDashboard({ sapixTexts = [], userId }) {
   // テキスト個別評価
   const [evaluatingTextId, setEvaluatingTextId] = useState(null)
 
+  const loadData = useCallback(async () => {
+    setLoading(true)
+    try {
+      if (!userId) return
+
+      const [units, logsResult] = await Promise.all([
+        Promise.resolve(getStaticMasterUnits()),
+        getLessonLogs(userId),
+      ])
+
+      setMasterUnits(units)
+
+      if (!logsResult.success) {
+        console.error('lessonLogs 読み取り失敗:', logsResult.error)
+      }
+      const logs = logsResult.success ? logsResult.data : []
+      setAllLogs(logs)  // stats は useEffect[allLogs] で自動再計算
+    } catch (err) {
+      console.error('データ取得エラー:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [userId])
+
   useEffect(() => {
     loadData()
   }, [loadData])
@@ -134,30 +158,6 @@ function MasterUnitDashboard({ sapixTexts = [], userId }) {
           }))
       })()
     : []
-
-  const loadData = useCallback(async () => {
-    setLoading(true)
-    try {
-      if (!userId) return
-
-      const [units, logsResult] = await Promise.all([
-        Promise.resolve(getStaticMasterUnits()),
-        getLessonLogs(userId),
-      ])
-
-      setMasterUnits(units)
-
-      if (!logsResult.success) {
-        console.error('lessonLogs 読み取り失敗:', logsResult.error)
-      }
-      const logs = logsResult.success ? logsResult.data : []
-      setAllLogs(logs)  // stats は useEffect[allLogs] で自動再計算
-    } catch (err) {
-      console.error('データ取得エラー:', err)
-    } finally {
-      setLoading(false)
-    }
-  }, [userId])
 
   // ドリルダウン：単元セルをタップ（同期処理。allLogsから即時フィルタ）
   const handleDrillDown = (unit) => {
