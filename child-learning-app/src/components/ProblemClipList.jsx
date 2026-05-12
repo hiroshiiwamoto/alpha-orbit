@@ -395,6 +395,13 @@ export default function ProblemClipList({
               {parseFloat(problem.correctRate).toFixed(1)}%
             </span>
           )}
+          {problem.unitIds?.length > 0 && (
+            <div className="clip-units" title={problem.unitIds.map(id => unitNameMap[id] || id).join('、')}>
+              {problem.unitIds.map(id => (
+                <span key={id} className="unit-tag">{unitNameMap[id] || id}</span>
+              ))}
+            </div>
+          )}
           {!problem.isCorrect && problem.correctRate != null && parseFloat(problem.correctRate) >= 50 && (
             <span className="clip-rate-warning" title="正答率50%以上で不正解 — 取るべき問題">
               🔺要注意
@@ -405,13 +412,7 @@ export default function ProblemClipList({
           )}
         </div>
         <div className="clip-item-right">
-          {problem.unitIds?.length > 0 && (
-            <div className="clip-units" title={problem.unitIds.map(id => unitNameMap[id] || id).join('、')}>
-              {problem.unitIds.map(id => (
-                <span key={id} className="unit-tag">{unitNameMap[id] || id}</span>
-              ))}
-            </div>
-          )}
+
           {problem.imageUrls?.length > 0 && <span className="clip-has-image" title="画像あり">📷{problem.imageUrls.length > 1 ? problem.imageUrls.length : ''}</span>}
           {!problem.isCorrect && (
             <span
