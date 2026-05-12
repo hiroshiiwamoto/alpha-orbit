@@ -115,7 +115,27 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  min-width: 0;
+}
+.clip-item .clip-units {
+  justify-content: flex-end;
+}
+.clip-item .clip-units .unit-tag {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .clip-item {
+    flex-wrap: wrap;
+  }
+  .clip-item .clip-units .unit-tag {
+    max-width: 110px;
+  }
 }
 
 .clip-correctness {
@@ -205,6 +225,7 @@
   border-left: 4px solid transparent;
   cursor: pointer;
   transition: filter 0.15s;
+  flex-wrap: wrap;
 }
 .clip-g-item:hover {
   filter: brightness(0.96);
@@ -248,6 +269,15 @@
   padding: 1px 6px;
   border-radius: 4px;
 }
+/* 単元タグ群（グリッド表示）— 行内に複数並べ、足りなければ折り返す */
+.clip-g-units {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: flex-end;
+}
 .clip-g-unit {
   font-size: 0.68rem;
   background: #f0fdf4;
@@ -258,6 +288,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .clip-g-unit {
+    max-width: 110px;
+  }
 }
 .clip-g-warn {
   font-size: 1rem;
