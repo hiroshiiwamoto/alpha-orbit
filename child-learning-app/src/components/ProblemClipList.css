@@ -115,14 +115,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-shrink: 1;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  min-width: 0;
+  flex-shrink: 0;
 }
-.clip-item .clip-units {
-  justify-content: flex-end;
-}
+/* 単元タグ（通常表示） — 正答率の隣に配置。長すぎる場合は ellipsis */
 .clip-item .clip-units .unit-tag {
   max-width: 140px;
   overflow: hidden;
