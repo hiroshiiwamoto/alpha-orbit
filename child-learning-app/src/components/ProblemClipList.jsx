@@ -637,6 +637,12 @@ export default function ProblemClipList({
             >
               削除
             </button>
+            <button
+              className="clip-done-btn"
+              onClick={() => { setSelectedProblem(null); setTaskDueDate(null) }}
+            >
+              ✓ 完了
+            </button>
           </div>
         </div>
       </div>,

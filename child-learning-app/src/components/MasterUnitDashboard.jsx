@@ -651,6 +651,12 @@ function MasterUnitDashboard({ sapixTexts = [], userId }) {
                 {resetting ? 'リセット中...' : 'この単元のデータを初期化'}
               </button>
             </div>
+
+            <div className="mud-drill-footer">
+              <button className="mud-drill-done-btn" onClick={() => setDrillUnit(null)}>
+                ✓ 完了
+              </button>
+            </div>
           </div>
         </div>
       )}

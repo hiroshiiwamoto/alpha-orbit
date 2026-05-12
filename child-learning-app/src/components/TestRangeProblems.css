@@ -57,6 +57,28 @@
   background: var(--color-gray-100, #f3f4f6);
 }
 
+.range-problems-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 20px;
+  border-top: 1px solid var(--color-gray-100, #f3f4f6);
+  background: white;
+}
+
+.range-problems-done-btn {
+  padding: 8px 22px;
+  background: var(--color-primary);
+  color: white;
+  border: 1px solid var(--color-primary);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.range-problems-done-btn:hover {
+  filter: brightness(0.95);
+}
+
 .range-problems-body {
   flex: 1;
   overflow-y: auto;

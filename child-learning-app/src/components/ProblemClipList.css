@@ -706,6 +706,18 @@
 }
 .clip-delete-btn:hover { background: var(--color-danger-bg); }
 
+.clip-done-btn {
+  padding: 6px 18px;
+  border: 1px solid var(--color-primary);
+  border-radius: 6px;
+  background: var(--color-primary);
+  color: white;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.clip-done-btn:hover { filter: brightness(0.95); }
+
 /* ── PDF切り出し科目タブ（問題追加フロー用）───────────── */
 
 .clip-cropper-subject-tabs {
