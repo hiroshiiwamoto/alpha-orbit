@@ -296,11 +296,13 @@ function App() {
             {/* 1. 今日と今週のタスク（最優先） */}
             <TodayAndWeekView
               tasks={tasks}
+              testScores={testScores}
               homeworkDone={homeworkDone}
               onToggleTask={toggleTask}
               onDeleteTask={deleteTask}
               onEditTask={handleEditTask}
               onToggleHomework={toggleHomework}
+              onTestClick={handleTestClick}
               userId={user.uid}
             />
 
