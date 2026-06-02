@@ -190,6 +190,12 @@ function TestRangeProblems({ userId, sapixRange, testName, sapixTexts, onClose, 
             </>
           )}
         </div>
+
+        <div className="range-problems-footer">
+          <button className="range-problems-done-btn" onClick={onClose}>
+            ✓ 完了
+          </button>
+        </div>
       </div>
 
       {zoomedImage && (
