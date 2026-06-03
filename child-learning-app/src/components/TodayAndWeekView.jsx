@@ -3,6 +3,7 @@ import './TodayAndWeekView.css'
 import { subjectEmojis, subjectColors, weekDayNames } from '../utils/constants'
 import { formatDate, parseLocalDate } from '../utils/dateUtils'
 import { getHomeworkForDate, getHomeworkByDate } from '../utils/sapixHomework'
+import { getTestReviewsForDate, getTestReviewsByDate } from '../utils/testReviews'
 import TaskDetailModal from './TaskDetailModal'
 
 // 優先度のラベルと色
@@ -12,7 +13,7 @@ const priorityStyles = {
   C: { label: 'C', color: '#3b82f6' },
 }
 
-function TodayAndWeekView({ tasks, homeworkDone, onToggleTask, onDeleteTask, onEditTask, onToggleHomework, userId }) {
+function TodayAndWeekView({ tasks, testScores = [], homeworkDone, onToggleTask, onDeleteTask, onEditTask, onToggleHomework, onTestClick, userId }) {
   const [expandedSection, setExpandedSection] = useState('today') // 'today', 'homework', 'week'
   const [detailTask, setDetailTask] = useState(null)
   const [todayStr, setTodayStr] = useState(() => formatDate(new Date()))
@@ -35,13 +36,27 @@ function TodayAndWeekView({ tasks, homeworkDone, onToggleTask, onDeleteTask, onE
 
   const weekHomework = useMemo(() => getHomeworkByDate(parseLocalDate(todayStr), 7), [todayStr])
 
-  // 家庭学習の完了チェック
+  // テスト復習タスク（翌日 / 1週間後 / 1ヶ月後）
+  const todayReviews = useMemo(
+    () => getTestReviewsForDate(testScores, parseLocalDate(todayStr)),
+    [testScores, todayStr]
+  )
+  const weekReviewsByDate = useMemo(
+    () => getTestReviewsByDate(testScores, parseLocalDate(todayStr), 7),
+    [testScores, todayStr]
+  )
+
+  // 家庭学習の完了チェック（復習タスクも homeworkDone に同居している）
   const isHomeworkDone = (hwId) => {
     return homeworkDone && homeworkDone[hwId] === true
   }
 
-  const todayHomeworkCount = todayHomework.length
-  const todayHomeworkDoneCount = todayHomework.filter(hw => isHomeworkDone(hw.id)).length
+  const todayHomeworkCount = todayHomework.length + todayReviews.length
+  const todayHomeworkDoneCount =
+    todayHomework.filter(hw => isHomeworkDone(hw.id)).length +
+    todayReviews.filter(r => isHomeworkDone(r.id)).length
+
+  const undoneReviewCount = todayReviews.filter(r => !isHomeworkDone(r.id)).length
 
   const toggleSection = (section) => {
     setExpandedSection(expandedSection === section ? null : section)
@@ -57,6 +72,16 @@ function TodayAndWeekView({ tasks, homeworkDone, onToggleTask, onDeleteTask, onE
 
   return (
     <div className="today-week-view">
+      {/* テスト復習のバナー通知 */}
+      {undoneReviewCount > 0 && (
+        <div className="review-banner" role="status">
+          <span className="review-banner-icon">🔁</span>
+          <span className="review-banner-text">
+            今日は <strong>テスト復習が{undoneReviewCount}件</strong> あります
+          </span>
+        </div>
+      )}
+
       {/* 今日の家庭学習 */}
       <div className="priority-section homework-section">
         <div
@@ -74,7 +99,33 @@ function TodayAndWeekView({ tasks, homeworkDone, onToggleTask, onDeleteTask, onE
 
         {expandedSection === 'today' && (
           <div className="task-grid">
-            {todayHomework.length === 0 ? (
+            {/* テスト復習タスク（家庭学習の上に配置） */}
+            {todayReviews.map(r => {
+              const done = isHomeworkDone(r.id)
+              return (
+                <div
+                  key={r.id}
+                  className={`priority-task review-task ${done ? 'completed' : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={done}
+                    onChange={() => onToggleHomework && onToggleHomework(r.id)}
+                    className="task-checkbox"
+                  />
+                  <span className="review-badge">🔁 復習</span>
+                  <button
+                    type="button"
+                    className="review-task-title"
+                    onClick={() => onTestClick && onTestClick(r.testId)}
+                  >
+                    {r.testName}
+                    <span className="review-interval">{r.intervalLabel}</span>
+                  </button>
+                </div>
+              )
+            })}
+            {todayHomework.length === 0 && todayReviews.length === 0 ? (
               <div className="no-tasks-message">今日の家庭学習はありません</div>
             ) : (
               todayHomework.map(hw => {
@@ -145,7 +196,11 @@ function TodayAndWeekView({ tasks, homeworkDone, onToggleTask, onDeleteTask, onE
               const d = parseLocalDate(dateStr)
               const dayName = weekDayNames[d.getDay()]
               const isToday = dateStr === formatDate(new Date())
-              const doneCount = hwTasks.filter(hw => isHomeworkDone(hw.id)).length
+              const reviewsForDay = weekReviewsByDate[dateStr] || []
+              const totalCount = hwTasks.length + reviewsForDay.length
+              const doneCount =
+                hwTasks.filter(hw => isHomeworkDone(hw.id)).length +
+                reviewsForDay.filter(r => isHomeworkDone(r.id)).length
 
               return (
                 <div key={dateStr} className={`week-day-block ${isToday ? 'is-today' : ''}`}>
@@ -154,14 +209,31 @@ function TodayAndWeekView({ tasks, homeworkDone, onToggleTask, onDeleteTask, onE
                       {d.getMonth() + 1}/{d.getDate()}({dayName})
                       {isToday && <span className="today-badge">TODAY</span>}
                     </span>
-                    {hwTasks.length > 0 && (
-                      <span className="week-day-count">{doneCount}/{hwTasks.length}</span>
+                    {totalCount > 0 && (
+                      <span className="week-day-count">{doneCount}/{totalCount}</span>
                     )}
                   </div>
-                  {hwTasks.length === 0 ? (
+                  {totalCount === 0 ? (
                     <div className="week-day-empty">-</div>
                   ) : (
                     <div className="week-day-tasks">
+                      {reviewsForDay.map(r => {
+                        const done = isHomeworkDone(r.id)
+                        return (
+                          <div
+                            key={r.id}
+                            className={`week-hw-item week-review-item ${done ? 'completed' : ''}`}
+                            onClick={() => onToggleHomework && onToggleHomework(r.id)}
+                          >
+                            <span className="week-hw-check">{done ? '✓' : '○'}</span>
+                            <span className="week-review-badge">🔁</span>
+                            <span className="week-hw-title">
+                              {r.testName}
+                              <span className="hw-lesson-info">{r.intervalLabel}</span>
+                            </span>
+                          </div>
+                        )
+                      })}
                       {hwTasks.map(hw => {
                         const subjectColor = subjectColors[hw.subject] || '#64748b'
                         const done = isHomeworkDone(hw.id)

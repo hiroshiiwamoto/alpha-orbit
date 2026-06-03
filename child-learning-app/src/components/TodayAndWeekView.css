@@ -2,6 +2,81 @@
   margin-bottom: 30px;
 }
 
+/* ─── テスト復習のバナー通知 ───────────────────────── */
+.review-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  background: linear-gradient(90deg, #fff7ed, #ffedd5);
+  border: 1px solid #fdba74;
+  border-radius: 12px;
+  color: #9a3412;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 6px rgba(251, 146, 60, 0.18);
+}
+.review-banner-icon {
+  font-size: 1.2rem;
+}
+.review-banner-text strong {
+  color: #c2410c;
+  font-weight: 700;
+}
+
+/* ─── 復習タスク（今日リスト用）───────────────────── */
+.priority-task.review-task {
+  border-color: #fb923c;
+  background-color: #fff7ed;
+  box-shadow: 0 2px 8px rgba(251, 146, 60, 0.25);
+}
+.priority-task.review-task.completed {
+  opacity: 0.6;
+}
+.review-badge {
+  font-size: 0.78rem;
+  padding: 2px 8px;
+  background: #c2410c;
+  color: white;
+  border-radius: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.review-task-title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #1f2937;
+  padding: 0;
+  font-weight: 600;
+}
+.review-task-title:hover {
+  text-decoration: underline;
+}
+.review-interval {
+  font-size: 0.75rem;
+  padding: 1px 8px;
+  background: #fed7aa;
+  color: #9a3412;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* ─── 復習タスク（週間表示用）───────────────────── */
+.week-hw-item.week-review-item {
+  background: #fff7ed;
+  border-left: 3px solid #fb923c;
+}
+.week-review-badge {
+  font-size: 0.9rem;
+}
+
 .priority-section {
   background: var(--color-white);
   border-radius: 16px;
