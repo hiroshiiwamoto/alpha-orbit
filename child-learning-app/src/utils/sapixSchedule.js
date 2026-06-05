@@ -377,7 +377,41 @@ const SAPIX_CALENDAR_4_2026_FIRST = {
   // 7/17=7月度復習テスト
 }
 
-// テスト日程
+// ═══ 2026年度 4年生 後期カレンダー（仙川校 D20〜D36）═══════
+// 同上の曜日割り。9月〜2027年1月までの正規授業日。
+const SAPIX_CALENDAR_4_2026_SECOND = {
+  'D20': { wed: '2026-09-02', fri: '2026-09-04' },
+  'D21': { wed: '2026-09-09', fri: '2026-09-11' },
+  'D22': { wed: '2026-09-16', fri: '2026-09-18' },
+  // 9/23=休講 → D23 以降のしばらくは金曜が先
+  'D23': { wed: '2026-09-30', fri: '2026-09-25' },
+  'D24': { wed: '2026-10-07', fri: '2026-10-02' },
+  // 10/9=10月度マンスリー確認テスト, 10/12=実力診断サピックスオープン
+  'D25': { wed: '2026-10-14', fri: '2026-10-16' },
+  'D26': { wed: '2026-10-21', fri: '2026-10-23' },
+  'D27': { wed: '2026-10-28', fri: '2026-10-30' },
+  'D28': { wed: '2026-11-04', fri: '2026-11-06' },
+  // 11/11=11月度マンスリー確認テスト → D29 以降しばらく金曜が先
+  'D29': { wed: '2026-11-18', fri: '2026-11-13' },
+  'D30': { wed: '2026-11-25', fri: '2026-11-20' },
+  'D31': { wed: '2026-12-02', fri: '2026-11-27' },
+  'D32': { wed: '2026-12-09', fri: '2026-12-04' },
+  // 12/11=12月度マンスリー確認テスト
+  'D33': { wed: '2026-12-16', fri: '2026-12-18' },
+  // 12/23, 12/25=休講, 12/26〜29 + 1/4〜5=冬期講習, 1/6=休講, 1/11=新学年組分けテスト
+  'D34': { wed: '2027-01-13', fri: '2027-01-08' },
+  'D35': { wed: '2027-01-20', fri: '2027-01-15' },
+  'D36': { wed: '2027-01-27', fri: '2027-01-22' },
+  // 1/29=1月度復習テスト（4年生最終授業）
+}
+
+// 前期＋後期を統合したカレンダー
+const SAPIX_CALENDAR_4_2026 = {
+  ...SAPIX_CALENDAR_4_2026_FIRST,
+  ...SAPIX_CALENDAR_4_2026_SECOND,
+}
+
+// テスト日程（前期）
 export const SAPIX_TESTS_4_2026_FIRST = [
   { date: '2026-03-08', name: '3月度組分けテスト' },
   { date: '2026-03-25', name: '3月度復習テスト' },
@@ -385,6 +419,23 @@ export const SAPIX_TESTS_4_2026_FIRST = [
   { date: '2026-06-17', name: '6月度マンスリー確認テスト' },
   { date: '2026-06-28', name: '7月度組分けテスト' },
   { date: '2026-07-17', name: '7月度復習テスト' },
+]
+
+// テスト日程（後期）
+export const SAPIX_TESTS_4_2026_SECOND = [
+  { date: '2026-08-28', name: '夏期講習マンスリー確認テスト' },     // 17:00-20:00
+  { date: '2026-10-09', name: '10月度マンスリー確認テスト' },       // 17:00-20:00
+  { date: '2026-10-12', name: '実力診断サピックスオープン' },        // 9:00-12:00 (月・祝)
+  { date: '2026-11-11', name: '11月度マンスリー確認テスト' },       // 17:00-20:00 (水)
+  { date: '2026-12-11', name: '12月度マンスリー確認テスト' },       // 17:00-20:00
+  { date: '2027-01-11', name: '新学年組分けテスト' },               // 13:30-16:30 (月・祝)
+  { date: '2027-01-29', name: '1月度復習テスト' },                  // 17:00-20:00（4年生最終）
+]
+
+// テスト日程（年間統合）
+export const SAPIX_TESTS_4_2026 = [
+  ...SAPIX_TESTS_4_2026_FIRST,
+  ...SAPIX_TESTS_4_2026_SECOND,
 ]
 
 // 春期講習日程
@@ -404,6 +455,28 @@ const SAPIX_SPRING_CALENDAR_4_2026_ALPHA = {
   '2026-03-30': ['H41-03', 'H43-02', 'H44-02'],  // 算数3, 理科2, 社会2
   '2026-04-01': ['H41-04', 'H42-03', 'H44-03'],  // 算数4, 国語3, 社会3
   '2026-04-02': ['H41-05', 'H42-04', 'H43-03'],  // 算数5, 国語4, 理科3
+}
+
+// 冬期講習日程（全6日, 9:00-12:00 60分×3コマ, 算数6/国語6/理科3/社会3）
+export const SAPIX_WINTER_4_2026 = [
+  { date: '2026-12-26', day: '土' },
+  { date: '2026-12-27', day: '日' },
+  { date: '2026-12-28', day: '月' },
+  { date: '2026-12-29', day: '火' },
+  { date: '2027-01-04', day: '月' },
+  { date: '2027-01-05', day: '火' },
+]
+
+// 冬期講習カレンダー（αクラス想定 — 春期と同様の配分推定）
+// 各日 3 コマ。算数 F41-01〜06, 国語 F42-01〜06, 理科 F43-01〜03, 社会 F44-01〜03。
+// 注: 日別の正確な順序は PDF 未掲載のため、春期と同じパターン（理科/社会を交互）を採用。
+const SAPIX_WINTER_CALENDAR_4_2026_ALPHA = {
+  '2026-12-26': ['F41-01', 'F42-01', 'F44-01'],  // 算数1, 国語1, 社会1
+  '2026-12-27': ['F41-02', 'F42-02', 'F43-01'],  // 算数2, 国語2, 理科1
+  '2026-12-28': ['F41-03', 'F42-03', 'F44-02'],  // 算数3, 国語3, 社会2
+  '2026-12-29': ['F41-04', 'F42-04', 'F43-02'],  // 算数4, 国語4, 理科2
+  '2027-01-04': ['F41-05', 'F42-05', 'F44-03'],  // 算数5, 国語5, 社会3
+  '2027-01-05': ['F41-06', 'F42-06', 'F43-03'],  // 算数6, 国語6, 理科3
 }
 
 // ── 正規表現 ────────────────────────────────────────────────
@@ -452,9 +525,9 @@ export function getStudyDateFromCode(code) {
   const numMatch = code.match(/^(?:41[AB]|42[AB]|43\d|44\d)-(\d{2})$/)
   if (!numMatch) return null
   const num = parseInt(numMatch[1])
-  if (num < 1 || num > 19) return null
+  if (num < 1 || num > 36) return null
   const dKey = `D${String(num).padStart(2, '0')}`
-  const cal = SAPIX_CALENDAR_4_2026_FIRST[dKey]
+  const cal = SAPIX_CALENDAR_4_2026[dKey]
   if (!cal) return null
   // 算数A (41A) + 算数B (41B) + 理科 (43x) → 水曜
   if (/^41[AB]-|^43\d-/.test(code)) return cal.wed
@@ -470,7 +543,7 @@ export function getStudyDateFromCode(code) {
  */
 export function generateSapixSessions() {
   const sessions = []
-  for (const [dNum, dates] of Object.entries(SAPIX_CALENDAR_4_2026_FIRST)) {
+  for (const [dNum, dates] of Object.entries(SAPIX_CALENDAR_4_2026)) {
     const num = dNum.replace('D', '')
     const sansuACode = `41A-${num}`
     const sansuBCode = `41B-${num}`
@@ -511,6 +584,16 @@ export function generateSapixSessions() {
       const info = SAPIX_SCHEDULE[code]
       if (info) {
         sessions.push({ date, dNumber: '春期', subject: info.subject, textCode: code, name: info.name, unitIds: info.unitIds })
+      }
+    }
+  }
+
+  // 冬期講習セッション（αクラス）
+  for (const [date, codes] of Object.entries(SAPIX_WINTER_CALENDAR_4_2026_ALPHA)) {
+    for (const code of codes) {
+      const info = SAPIX_SCHEDULE[code]
+      if (info) {
+        sessions.push({ date, dNumber: '冬期', subject: info.subject, textCode: code, name: info.name, unitIds: info.unitIds })
       }
     }
   }
