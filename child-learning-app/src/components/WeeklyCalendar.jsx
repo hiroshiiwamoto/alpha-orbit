@@ -152,6 +152,20 @@ function WeeklyCalendar({ tasks, sapixTexts = [], testScores = [], onToggleTask,
   // ── セッション行の描画（週間ビュー用）──────────────────────
   const renderSessionItem = (item, index) => {
     const linked = item.linkedText
+    // 季節講習マーカー（教科・テキスト未割当）は「未登録」扱いにせず名称のみ表示
+    const isSeasonMarker = !item.textCode && !item.subject
+    if (isSeasonMarker) {
+      return (
+        <div
+          key={`session-${index}`}
+          className="calendar-lesson season-marker"
+          title={item.name}
+        >
+          <span className="lesson-icon">🏫</span>
+          <span className="lesson-name">{item.name}</span>
+        </div>
+      )
+    }
     return (
       <div
         key={`session-${item.textCode || index}`}
@@ -176,6 +190,14 @@ function WeeklyCalendar({ tasks, sapixTexts = [], testScores = [], onToggleTask,
   // ── セッションドットの描画（月間ビュー用）─────────────────
   const renderSessionDot = (item, index) => {
     const linked = item.linkedText
+    const isSeasonMarker = !item.textCode && !item.subject
+    if (isSeasonMarker) {
+      return (
+        <div key={`dot-${index}`} className="lesson-dot season-dot-marker" title={item.name}>
+          🏫
+        </div>
+      )
+    }
     return (
       <div
         key={`dot-${item.textCode || index}`}

@@ -537,6 +537,18 @@
   white-space: nowrap;
 }
 
+/* 季節講習マーカー（夏期講習など・教科未定）— 緑系で強調 */
+.calendar-lesson.season-marker {
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  color: #047857;
+  font-weight: 600;
+}
+.lesson-dot.season-dot-marker {
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+}
+
 .calendar-lesson.clickable-row {
   cursor: pointer;
   transition: all 0.15s;

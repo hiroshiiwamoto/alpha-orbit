@@ -276,6 +276,8 @@ function generateSeasonHomework(sessions, today, allTasks) {
   const horizonStr = formatDate(addDays(today, 6))
   for (const s of sessions) {
     if (!SEASON_DNUMBERS.has(s.dNumber)) continue
+    // 教科・テキスト未割当のマーカー（夏期講習など）は家庭学習タスクを生成しない
+    if (!s.subject || !s.textCode) continue
     const classDate = parseLocalDate(s.date)
     const dueDate = addDays(classDate, 1)
     const dueDateStr = formatDate(dueDate)

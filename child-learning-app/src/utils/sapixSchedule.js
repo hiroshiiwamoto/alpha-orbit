@@ -447,6 +447,27 @@ export const SAPIX_SPRING_4_2026 = [
   { date: '2026-04-02', day: '木' },
 ]
 
+// 夏期講習日程（全14回）
+// 教科割当（どの日にどの教科・テキストか）は未定のため、日付のみ登録。
+// カレンダー上に「夏期講習」マーカーとして表示する。
+export const SAPIX_SUMMER_4_2026 = [
+  { date: '2026-07-30', day: '木' },  // 1（新コース開始）
+  { date: '2026-07-31', day: '金' },  // 2
+  { date: '2026-08-02', day: '日' },  // 3
+  { date: '2026-08-03', day: '月' },  // 4
+  { date: '2026-08-06', day: '木' },  // 5
+  { date: '2026-08-07', day: '金' },  // 6
+  { date: '2026-08-08', day: '土' },  // 7
+  { date: '2026-08-15', day: '土' },  // 8
+  { date: '2026-08-16', day: '日' },  // 9
+  { date: '2026-08-18', day: '火' },  // 10
+  { date: '2026-08-19', day: '水' },  // 11
+  { date: '2026-08-21', day: '金' },  // 12
+  { date: '2026-08-22', day: '土' },  // 13
+  { date: '2026-08-23', day: '日' },  // 14
+  // 8/28(金) 夏期講習マンスリー確認テスト（講習日ではないため含めない）
+]
+
 // 春期講習カレンダー（αクラス）
 // 各日の授業: [9:00-10:00, 10:00-11:00, 11:00-12:00]
 const SAPIX_SPRING_CALENDAR_4_2026_ALPHA = {
@@ -596,6 +617,12 @@ export function generateSapixSessions() {
         sessions.push({ date, dNumber: '冬期', subject: info.subject, textCode: code, name: info.name, unitIds: info.unitIds })
       }
     }
+  }
+
+  // 夏期講習マーカー（教科・テキスト割当は未定のため日付のみ登録）
+  // textCode/subject を持たないため家庭学習タスク生成の対象外（下記参照）。
+  for (const { date } of SAPIX_SUMMER_4_2026) {
+    sessions.push({ date, dNumber: '夏期', subject: null, textCode: '', name: '夏期講習', unitIds: [] })
   }
 
   return sessions.sort((a, b) => a.date.localeCompare(b.date))
