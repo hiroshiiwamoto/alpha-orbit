@@ -478,6 +478,27 @@ const SAPIX_SPRING_CALENDAR_4_2026_ALPHA = {
   '2026-04-02': ['H41-05', 'H42-04', 'H43-03'],  // 算数5, 国語4, 理科3
 }
 
+// 夏期講習カレンダー（4αクラス・206教室）
+// 各日 3 コマ (9:00-10:00, 10:00-11:00, 11:00-12:00)。
+// 仙川校 2026年度4年生 夏期講習時間割 PDF の 4α 行を反映。
+// 数字は各教科の回数（算数1 = N41-01）。算数14/国語12/理科8/社会8 = 全42コマ。
+const SAPIX_SUMMER_CALENDAR_4_2026_ALPHA = {
+  '2026-07-30': ['N41-01', 'N42-01', 'N44-01'],  // 算数1, 国語1, 社会1
+  '2026-07-31': ['N41-02', 'N42-02', 'N43-01'],  // 算数2, 国語2, 理科1
+  '2026-08-02': ['N41-03', 'N42-03', 'N44-02'],  // 算数3, 国語3, 社会2
+  '2026-08-03': ['N41-04', 'N43-02', 'N44-03'],  // 算数4, 理科2, 社会3
+  '2026-08-06': ['N41-05', 'N42-04', 'N43-03'],  // 算数5, 国語4, 理科3
+  '2026-08-07': ['N41-06', 'N42-05', 'N44-04'],  // 算数6, 国語5, 社会4
+  '2026-08-08': ['N41-07', 'N42-06', 'N43-04'],  // 算数7, 国語6, 理科4
+  '2026-08-15': ['N41-08', 'N42-07', 'N44-05'],  // 算数8, 国語7, 社会5
+  '2026-08-16': ['N41-09', 'N42-08', 'N43-05'],  // 算数9, 国語8, 理科5
+  '2026-08-18': ['N41-10', 'N42-09', 'N44-06'],  // 算数10, 国語9, 社会6
+  '2026-08-19': ['N41-11', 'N43-06', 'N44-07'],  // 算数11, 理科6, 社会7
+  '2026-08-21': ['N41-12', 'N42-10', 'N43-07'],  // 算数12, 国語10, 理科7
+  '2026-08-22': ['N41-13', 'N42-11', 'N44-08'],  // 算数13, 国語11, 社会8
+  '2026-08-23': ['N41-14', 'N42-12', 'N43-08'],  // 算数14, 国語12, 理科8
+}
+
 // 冬期講習日程（全6日, 9:00-12:00 60分×3コマ, 算数6/国語6/理科3/社会3）
 export const SAPIX_WINTER_4_2026 = [
   { date: '2026-12-26', day: '土' },
@@ -542,7 +563,18 @@ export function gradeFromCode(code) {
  * @returns {string|null} - 例: "2026-02-18" or null
  */
 export function getStudyDateFromCode(code) {
-  // テキストコードから連番を抽出
+  // 季節講習コード（H:春期 / N:夏期 / F:冬期）はカレンダーから逆引き
+  if (/^[HNF]\d{2}-\d{2}/.test(code)) {
+    const seasonCal =
+      code.startsWith('H') ? SAPIX_SPRING_CALENDAR_4_2026_ALPHA :
+      code.startsWith('N') ? SAPIX_SUMMER_CALENDAR_4_2026_ALPHA :
+      SAPIX_WINTER_CALENDAR_4_2026_ALPHA
+    for (const [date, codes] of Object.entries(seasonCal)) {
+      if (codes.includes(code)) return date
+    }
+    return null
+  }
+  // 通常授業コードから連番を抽出
   const numMatch = code.match(/^(?:41[AB]|42[AB]|43\d|44\d)-(\d{2})$/)
   if (!numMatch) return null
   const num = parseInt(numMatch[1])
@@ -619,10 +651,14 @@ export function generateSapixSessions() {
     }
   }
 
-  // 夏期講習マーカー（教科・テキスト割当は未定のため日付のみ登録）
-  // textCode/subject を持たないため家庭学習タスク生成の対象外（下記参照）。
-  for (const { date } of SAPIX_SUMMER_4_2026) {
-    sessions.push({ date, dNumber: '夏期', subject: null, textCode: '', name: '夏期講習', unitIds: [] })
+  // 夏期講習セッション（4αクラス）
+  for (const [date, codes] of Object.entries(SAPIX_SUMMER_CALENDAR_4_2026_ALPHA)) {
+    for (const code of codes) {
+      const info = SAPIX_SCHEDULE[code]
+      if (info) {
+        sessions.push({ date, dNumber: '夏期', subject: info.subject, textCode: code, name: info.name, unitIds: info.unitIds })
+      }
+    }
   }
 
   return sessions.sort((a, b) => a.date.localeCompare(b.date))
