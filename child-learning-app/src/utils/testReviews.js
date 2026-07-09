@@ -20,6 +20,9 @@ export const REVIEW_INTERVALS = [
  */
 function reviewsForTest(test) {
   if (!test?.testDate || !test?.id) return []
+  // 予定登録のみで未実施のテストは復習対象外
+  // （status なしの旧データは completed 扱いなので対象に含める）
+  if (test.status === 'scheduled') return []
   const testDate = parseLocalDate(test.testDate)
   if (!testDate || isNaN(testDate.getTime())) return []
   return REVIEW_INTERVALS.map(interval => {
