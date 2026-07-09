@@ -4,8 +4,21 @@ import { updateTestScore, getProblemsForTestScore } from '../utils/testScores'
 import { toast } from '../utils/toast'
 import './TestScoreView.css'
 
-function formatReviewHtml(text) {
+// AI総評（Gemini 出力 / Firestore 保存値）は信頼できない入力として扱う。
+// Markdown 変換の前に HTML特殊文字をエスケープすることで、変換後の HTML には
+// この関数自身が挿入する固定タグ (h4/h5/ul/li/strong/br) しか存在しなくなり、
+// スクリプト注入の経路が構造的に閉じる。
+function escapeHtml(text) {
   return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function formatReviewHtml(text) {
+  return escapeHtml(text)
     .replace(/^## (.+)$/gm, '<h4>$1</h4>')
     .replace(/^### (.+)$/gm, '<h5>$1</h5>')
     .replace(/^- (.+)$/gm, '<li>$1</li>')
