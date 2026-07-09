@@ -41,6 +41,11 @@ jobs:
           cd child-learning-app
           npm ci
 
+      - name: Test
+        run: |
+          cd child-learning-app
+          npm test
+
       - name: Build
         run: |
           cd child-learning-app
