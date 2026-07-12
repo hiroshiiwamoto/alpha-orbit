@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useRef, useState, useMemo } from 'react'
+import { useReducer, useEffect, useRef, useState, useMemo, lazy, Suspense } from 'react'
 import './TestScoreView.css'
 import { getTodayString } from '../utils/dateUtils'
 import {
@@ -20,7 +20,6 @@ import { MAX_FILE_SIZE, SUBJECTS } from '../utils/constants'
 import { toast } from '../utils/toast'
 import { LABELS, TOAST } from '../utils/messages'
 import ProblemClipList from './ProblemClipList'
-import PdfCropper from './PdfCropper'
 import DriveFilePicker from './DriveFilePicker'
 import { uploadPDFToDrive, checkDriveAccess } from '../utils/googleDriveStorage'
 import { refreshGoogleAccessToken } from '../utils/googleAccessToken'
@@ -33,6 +32,9 @@ import {
   getSapixCodesBySubject,
   computeCoveredUnitIds,
 } from '../utils/sapixSchedule'
+
+// PdfCropper は pdfjs-dist（約400KB）を含むため、開くまでロードしない
+const PdfCropper = lazy(() => import('./PdfCropper'))
 
 const EMPTY_ADD_FORM = {
   testName: '',
@@ -1522,6 +1524,7 @@ function TestScoreView({ user, initialTestId, onConsumeInitialTestId, sapixTexts
 
       {/* OCRプレビュー用PDFクロッパー */}
       {ocrCropperTarget != null && (
+        <Suspense fallback={null}>
         <PdfCropper
           key={`ocr-crop-${ocrCropperTarget}`}
           userId={user.uid}
@@ -1558,6 +1561,7 @@ function TestScoreView({ user, initialTestId, onConsumeInitialTestId, sapixTexts
             </div>
           }
         />
+        </Suspense>
       )}
 
       {/* 問題クリップ */}
