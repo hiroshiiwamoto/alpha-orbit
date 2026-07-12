@@ -1,15 +1,19 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react'
 import './App.css'
 import './utils/toast.css'
 import Auth from './components/Auth'
 import TodayAndWeekView from './components/TodayAndWeekView'
 import TaskForm from './components/TaskForm'
 import ScheduleView from './components/ScheduleView'
-import UnitAnalysisView from './components/UnitAnalysisView'
-import PastPaperView from './components/PastPaperView'
-import TestScoreView from './components/TestScoreView'
-import GradesView from './components/GradesView'
-import SapixTextView from './components/SapixTextView'
+import Loading from './components/Loading'
+
+// タブビューは初回表示に不要なので遅延ロード（バンドル分割）。
+// デフォルトの schedule ビュー（TodayAndWeekView + ScheduleView）だけ即時ロード。
+const UnitAnalysisView = lazy(() => import('./components/UnitAnalysisView'))
+const PastPaperView = lazy(() => import('./components/PastPaperView'))
+const TestScoreView = lazy(() => import('./components/TestScoreView'))
+const GradesView = lazy(() => import('./components/GradesView'))
+const SapixTextView = lazy(() => import('./components/SapixTextView'))
 import {
   addTaskToFirestore,
   updateTaskInFirestore,
@@ -358,37 +362,41 @@ function App() {
             onTestClick={handleTestClick}
             userId={user.uid}
           />
-        ) : view === 'dashboard' ? (
-          <UnitAnalysisView
-            tasks={tasks}
-            sapixTexts={sapixTexts}
-            userId={user.uid}
-          />
-        ) : view === 'pastpaper' ? (
-          <PastPaperView
-            tasks={tasks}
-            user={user}
-            customUnits={customUnits}
-            onAddTask={addTask}
-            onUpdateTask={updateTask}
-            onDeleteTask={deleteTask}
-          />
-        ) : view === 'grades' ? (
-          <GradesView
-            user={user}
-          />
-        ) : view === 'testscore' ? (
-          <TestScoreView
-            user={user}
-            initialTestId={pendingTestId}
-            onConsumeInitialTestId={consumeInitialTestId}
-            sapixTexts={sapixTexts}
-          />
-        ) : view === 'sapixtext' ? (
-          <SapixTextView
-            user={user}
-          />
-        ) : null}
+        ) : (
+          <Suspense fallback={<Loading message="読み込み中..." />}>
+            {view === 'dashboard' ? (
+              <UnitAnalysisView
+                tasks={tasks}
+                sapixTexts={sapixTexts}
+                userId={user.uid}
+              />
+            ) : view === 'pastpaper' ? (
+              <PastPaperView
+                tasks={tasks}
+                user={user}
+                customUnits={customUnits}
+                onAddTask={addTask}
+                onUpdateTask={updateTask}
+                onDeleteTask={deleteTask}
+              />
+            ) : view === 'grades' ? (
+              <GradesView
+                user={user}
+              />
+            ) : view === 'testscore' ? (
+              <TestScoreView
+                user={user}
+                initialTestId={pendingTestId}
+                onConsumeInitialTestId={consumeInitialTestId}
+                sapixTexts={sapixTexts}
+              />
+            ) : view === 'sapixtext' ? (
+              <SapixTextView
+                user={user}
+              />
+            ) : null}
+          </Suspense>
+        )}
           </>
         )}
 

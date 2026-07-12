@@ -5,7 +5,7 @@
 //   'test'     — テスト分析タブ (TestScoreView)
 //   'pastPaper' — 過去問タブ (PastPaperView)
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, lazy, Suspense } from 'react'
 import { createPortal } from 'react-dom'
 import { nowISO } from '../utils/dateUtils'
 import {
@@ -20,8 +20,11 @@ import { getStaticMasterUnits } from '../utils/importMasterUnits'
 import { toast } from '../utils/toast'
 import { LABELS, TOAST } from '../utils/messages'
 import UnitTagPicker from './UnitTagPicker'
-import PdfCropper from './PdfCropper'
 import './ProblemClipList.css'
+
+// PdfCropper は pdfjs-dist（約400KB）を含むため、切り出しモーダルを
+// 開くまでロードしない（バンドル分割）
+const PdfCropper = lazy(() => import('./PdfCropper'))
 
 const DIFFICULTY_LABELS = { 1: '★', 2: '★★', 3: '★★★', 4: '★★★★', 5: '★★★★★' }
 const MISS_TYPE_OPTIONS = [
@@ -911,6 +914,7 @@ export default function ProblemClipList({
 
       {/* PDF切り出し（問題追加フロー用） */}
       {showCropper && (
+        <Suspense fallback={null}>
         <PdfCropper
           key={typeof showCropper === 'string' ? showCropper : 'crop'}
           userId={userId}
@@ -937,10 +941,12 @@ export default function ProblemClipList({
             ) : undefined
           }
         />
+        </Suspense>
       )}
 
       {/* PDF切り出し（詳細モーダルから画像追加） */}
       {detailCropper && (
+        <Suspense fallback={null}>
         <PdfCropper
           key={typeof detailCropper === 'string' ? `detail-${detailCropper}` : 'detail-crop'}
           userId={userId}
@@ -967,6 +973,7 @@ export default function ProblemClipList({
             ) : undefined
           }
         />
+        </Suspense>
       )}
     </div>
   )
