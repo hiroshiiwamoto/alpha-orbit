@@ -12,13 +12,14 @@ const subjectLabels = { sansu: '算数', kokugo: '国語', rika: '理科', shaka
 const subjectColors = { sansu: '#ef4444', kokugo: '#10b981', rika: '#3b82f6', shakai: '#f59e0b' }
 const subjectEmojis = { sansu: '🔢', kokugo: '📖', rika: '🔬', shakai: '🌏' }
 
-// ── 単一ライン折れ線グラフ（共通描画）──────────────────────
-// points: [{ val, index }] — index は data 配列上の位置
-// 自身のデータ範囲で Y スケールを計算して 1 本のラインを描く
-function SingleLineChart({ data, points, color }) {
-  if (points.length === 0) return null
+// ── 折れ線グラフ（共通描画・複数ライン対応）─────────────────
+// lines: [{ points: [{ val, index }], color }] — index は data 配列上の位置
+// 全ラインの値からデータ範囲を計算して Y スケールを共有する
+function LineChart({ data, lines }) {
+  const drawable = lines.filter(l => l.points.length > 0)
+  if (drawable.length === 0) return null
 
-  const values = points.map(p => p.val)
+  const values = drawable.flatMap(l => l.points.map(p => p.val))
   const minVal = Math.floor(Math.min(...values) - 3)
   const maxVal = Math.ceil(Math.max(...values) + 3)
   const range = maxVal - minVal || 1
@@ -32,15 +33,18 @@ function SingleLineChart({ data, points, color }) {
   const xStep = chartWidth / (data.length - 1 || 1)
   const getY = (val) => padding.top + chartHeight - ((val - minVal) / range) * chartHeight
 
-  const coords = points.map(p => ({
-    ...p,
-    x: padding.left + p.index * xStep,
-    y: getY(p.val),
-  }))
-
-  const path = coords.length >= 2
-    ? coords.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
-    : ''
+  // 各ラインの座標とパスを構築
+  const drawn = drawable.map(line => {
+    const coords = line.points.map(p => ({
+      ...p,
+      x: padding.left + p.index * xStep,
+      y: getY(p.val),
+    }))
+    const path = coords.length >= 2
+      ? coords.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
+      : ''
+    return { color: line.color, coords, path }
+  })
 
   const gridLines = []
   const gridStep = range > 20 ? 5 : range > 10 ? 2 : 1
@@ -89,14 +93,18 @@ function SingleLineChart({ data, points, color }) {
         </text>
       ))}
 
-      {/* Line */}
-      {path && <path d={path} fill="none" stroke={color} strokeWidth={2.5} />}
-      {coords.map((p, i) => (
-        <g key={i}>
-          <circle cx={p.x} cy={p.y} r="5" fill="white" stroke={color} strokeWidth="2" />
-          <text x={p.x} y={p.y - 10} textAnchor="middle" fontSize="10" fill={color} fontWeight="600">
-            {p.val}
-          </text>
+      {/* Lines */}
+      {drawn.map((line, li) => (
+        <g key={li}>
+          {line.path && <path d={line.path} fill="none" stroke={line.color} strokeWidth={2.5} />}
+          {line.coords.map((p, i) => (
+            <g key={i}>
+              <circle cx={p.x} cy={p.y} r="5" fill="white" stroke={line.color} strokeWidth="2" />
+              <text x={p.x} y={p.y - 10} textAnchor="middle" fontSize="10" fill={line.color} fontWeight="600">
+                {p.val}
+              </text>
+            </g>
+          ))}
         </g>
       ))}
     </svg>
@@ -160,16 +168,28 @@ function DeviationChart({ data }) {
       {!hasActiveData ? (
         <div className="chart-no-data">このモードのデータはありません</div>
       ) : effectiveMode === 'subjects' ? (
-        /* 各科目 — トグルで科目を選び、通常サイズのグラフ1つで表示 */
+        /* 各科目 — トグルで「全科目（重ね描き）」or 単一科目を選択。グラフサイズは共通 */
         (() => {
-          // 選択中の科目（未選択・データなしの場合はデータのある最初の科目）
+          // 選択中の科目。'all'=全科目重ね描き。データなし科目が選ばれていたら 'all' に戻す
           const activeSubject =
-            selectedSubject && subjectLines[selectedSubject].length > 0
-              ? selectedSubject
-              : subjectKeys.find(key => subjectLines[key].length > 0)
+            selectedSubject === 'all' || !selectedSubject ? 'all'
+            : subjectLines[selectedSubject].length > 0 ? selectedSubject
+            : 'all'
+          const isAll = activeSubject === 'all'
+          const availableKeys = subjectKeys.filter(key => subjectLines[key].length > 0)
+          const lines = isAll
+            ? availableKeys.map(key => ({ points: subjectLines[key], color: subjectColors[key] }))
+            : [{ points: subjectLines[activeSubject], color: subjectColors[activeSubject] }]
           return (
             <>
               <div className="subject-toggle">
+                <button
+                  className={`subject-toggle-btn ${isAll ? 'active' : ''}`}
+                  style={{ '--subject-color': '#6366f1' }}
+                  onClick={() => setSelectedSubject('all')}
+                >
+                  📊 全科目
+                </button>
                 {subjectKeys.map(key => {
                   const hasData = subjectLines[key].length > 0
                   return (
@@ -186,12 +206,18 @@ function DeviationChart({ data }) {
                 })}
               </div>
               <div className="chart-wrapper">
-                <SingleLineChart
-                  data={data}
-                  points={subjectLines[activeSubject]}
-                  color={subjectColors[activeSubject]}
-                />
+                <LineChart data={data} lines={lines} />
               </div>
+              {isAll && (
+                <div className="chart-legend">
+                  {availableKeys.map(key => (
+                    <div key={key} className="legend-item">
+                      <span className="legend-color" style={{ background: subjectColors[key] }} />
+                      <span>{subjectLabels[key]}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </>
           )
         })()
@@ -199,10 +225,12 @@ function DeviationChart({ data }) {
         /* 4科目 / 2科目 — 従来通り1つの大きなグラフ */
         <>
           <div className="chart-wrapper">
-            <SingleLineChart
+            <LineChart
               data={data}
-              points={effectiveMode === 'four' ? fourLine : twoLine}
-              color={effectiveMode === 'four' ? '#3b82f6' : '#10b981'}
+              lines={[{
+                points: effectiveMode === 'four' ? fourLine : twoLine,
+                color: effectiveMode === 'four' ? '#3b82f6' : '#10b981',
+              }]}
             />
           </div>
           <div className="chart-legend">
