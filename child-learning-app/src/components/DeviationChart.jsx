@@ -15,7 +15,7 @@ const subjectEmojis = { sansu: '🔢', kokugo: '📖', rika: '🔬', shakai: '�
 // ── 単一ライン折れ線グラフ（共通描画）──────────────────────
 // points: [{ val, index }] — index は data 配列上の位置
 // 自身のデータ範囲で Y スケールを計算して 1 本のラインを描く
-function SingleLineChart({ data, points, color, compact = false }) {
+function SingleLineChart({ data, points, color }) {
   if (points.length === 0) return null
 
   const values = points.map(p => p.val)
@@ -24,8 +24,8 @@ function SingleLineChart({ data, points, color, compact = false }) {
   const range = maxVal - minVal || 1
 
   const width = 600
-  const height = compact ? 240 : 300
-  const padding = { top: 26, right: 20, bottom: compact ? 46 : 60, left: 50 }
+  const height = 300
+  const padding = { top: 26, right: 20, bottom: 60, left: 50 }
   const chartWidth = width - padding.left - padding.right
   const chartHeight = height - padding.top - padding.bottom
 
@@ -105,6 +105,7 @@ function SingleLineChart({ data, points, color, compact = false }) {
 
 function DeviationChart({ data }) {
   const [mode, setMode] = useState(null)
+  const [selectedSubject, setSelectedSubject] = useState(null)
 
   if (!data || data.length < 1) return null
 
@@ -159,27 +160,41 @@ function DeviationChart({ data }) {
       {!hasActiveData ? (
         <div className="chart-no-data">このモードのデータはありません</div>
       ) : effectiveMode === 'subjects' ? (
-        /* 各科目 — 科目ごとに独立したグラフを並べる */
-        <div className="subject-charts-grid">
-          {subjectKeys.map(key => {
-            if (subjectLines[key].length < 1) return null
-            return (
-              <div key={key} className="subject-chart-cell">
-                <h4 className="subject-chart-title" style={{ color: subjectColors[key] }}>
-                  {subjectEmojis[key]} {subjectLabels[key]}
-                </h4>
-                <div className="chart-wrapper">
-                  <SingleLineChart
-                    data={data}
-                    points={subjectLines[key]}
-                    color={subjectColors[key]}
-                    compact
-                  />
-                </div>
+        /* 各科目 — トグルで科目を選び、通常サイズのグラフ1つで表示 */
+        (() => {
+          // 選択中の科目（未選択・データなしの場合はデータのある最初の科目）
+          const activeSubject =
+            selectedSubject && subjectLines[selectedSubject].length > 0
+              ? selectedSubject
+              : subjectKeys.find(key => subjectLines[key].length > 0)
+          return (
+            <>
+              <div className="subject-toggle">
+                {subjectKeys.map(key => {
+                  const hasData = subjectLines[key].length > 0
+                  return (
+                    <button
+                      key={key}
+                      className={`subject-toggle-btn ${activeSubject === key ? 'active' : ''}`}
+                      style={{ '--subject-color': subjectColors[key] }}
+                      disabled={!hasData}
+                      onClick={() => setSelectedSubject(key)}
+                    >
+                      {subjectEmojis[key]} {subjectLabels[key]}
+                    </button>
+                  )
+                })}
               </div>
-            )
-          })}
-        </div>
+              <div className="chart-wrapper">
+                <SingleLineChart
+                  data={data}
+                  points={subjectLines[activeSubject]}
+                  color={subjectColors[activeSubject]}
+                />
+              </div>
+            </>
+          )
+        })()
       ) : (
         /* 4科目 / 2科目 — 従来通り1つの大きなグラフ */
         <>

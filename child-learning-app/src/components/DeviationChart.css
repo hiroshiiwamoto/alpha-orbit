@@ -72,30 +72,41 @@
   height: auto;
 }
 
-/* 各科目モード — 科目別グラフのグリッド（PC: 2列 / モバイル: 1列） */
-.subject-charts-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+/* 各科目モード — 科目切替トグル */
+.subject-toggle {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 12px;
 }
 
-.subject-chart-cell {
-  border: 1px solid var(--color-gray-100, #f3f4f6);
-  border-radius: 12px;
-  padding: 12px;
-  background: #fafafa;
+.subject-toggle-btn {
+  padding: 6px 16px;
+  border: 1.5px solid var(--color-gray-200, #e5e7eb);
+  border-radius: 8px;
+  background: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-gray-500, #6b7280);
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
-.subject-chart-title {
-  margin: 0 0 8px;
-  font-size: 0.9375rem;
-  font-weight: 700;
+.subject-toggle-btn:hover:not(:disabled) {
+  border-color: var(--subject-color);
+  color: var(--subject-color);
 }
 
-@media (max-width: 640px) {
-  .subject-charts-grid {
-    grid-template-columns: 1fr;
-  }
+.subject-toggle-btn.active {
+  background: var(--subject-color);
+  border-color: var(--subject-color);
+  color: white;
+}
+
+.subject-toggle-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .chart-legend {
