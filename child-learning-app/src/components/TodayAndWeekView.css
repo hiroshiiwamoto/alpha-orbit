@@ -570,3 +570,94 @@
     font-size: 0.72rem;
   }
 }
+
+/* ─── 持ち時間ベースの割り付け表示 ─────────────────────── */
+
+/* 今日ヘッダー: 必須の所要時間 / 持ち時間 */
+.plan-minutes {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #eff6ff;
+  color: #1d4ed8;
+  vertical-align: middle;
+}
+.plan-minutes.over {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+/* タスクの所要時間・上限バッジ */
+.hw-minutes-badge {
+  font-size: 0.72rem;
+  color: #475569;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  padding: 1px 7px;
+  white-space: nowrap;
+}
+.hw-cap-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #b45309;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  padding: 1px 7px;
+  white-space: nowrap;
+}
+
+/* 余裕があれば（持ち時間に入りきらない分） */
+.optional-header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-top: 1px dashed var(--color-gray-200, #e5e7eb);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-gray-600, #4b5563);
+}
+.optional-note {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--color-gray-400, #9ca3af);
+}
+.priority-task.optional {
+  opacity: 0.6;
+  border-style: dashed;
+}
+.priority-task.optional.completed {
+  opacity: 0.45;
+}
+
+/* 週間ビュー: 日ごとの所要時間 / 持ち時間 */
+.week-day-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.week-day-minutes {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border-radius: 8px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+.week-day-minutes.over {
+  color: #b91c1c;
+  background: #fef2f2;
+}
+.week-hw-item.overflow {
+  opacity: 0.55;
+  border-left: 3px dashed var(--color-gray-300, #d1d5db);
+}
