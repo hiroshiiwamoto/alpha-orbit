@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import './TodayAndWeekView.css'
 import { subjectEmojis, subjectColors, weekDayNames } from '../utils/constants'
 import { formatDate, parseLocalDate } from '../utils/dateUtils'
-import { getHomeworkForDate, getHomeworkByDate } from '../utils/sapixHomework'
+import { getHomeworkForDate, getHomeworkByDate, getDayPlan } from '../utils/sapixHomework'
 import { getTestReviewsForDate, getTestReviewsByDate } from '../utils/testReviews'
 import TaskDetailModal from './TaskDetailModal'
 
@@ -51,10 +51,73 @@ function TodayAndWeekView({ tasks, testScores = [], homeworkDone, onToggleTask, 
     return homeworkDone && homeworkDone[hwId] === true
   }
 
+  // 今日のプラン: 持ち時間に収まる「必須」と、入りきらない「余裕があれば」に分ける
+  const todayPlan = useMemo(
+    () => getDayPlan(todayHomework, parseLocalDate(todayStr)),
+    [todayHomework, todayStr]
+  )
+
   const todayHomeworkCount = todayHomework.length + todayReviews.length
   const todayHomeworkDoneCount =
     todayHomework.filter(hw => isHomeworkDone(hw.id)).length +
     todayReviews.filter(r => isHomeworkDone(r.id)).length
+
+  // 家庭学習 1 件の描画（今日リスト用）。必須 / 余裕があれば で共通。
+  const renderHomeworkItem = (hw) => {
+    const subjectColor = subjectColors[hw.subject] || '#64748b'
+    const done = isHomeworkDone(hw.id)
+    const pStyle = priorityStyles[hw.priority]
+    return (
+      <div
+        key={hw.id}
+        className={`priority-task ${done ? 'completed' : ''} ${hw.overflow ? 'optional' : ''}`}
+        style={{
+          borderColor: subjectColor,
+          backgroundColor: `${subjectColor}15`,
+          boxShadow: `0 2px 8px ${subjectColor}25`
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={done}
+          onChange={() => onToggleHomework && onToggleHomework(hw.id)}
+          className="task-checkbox"
+        />
+        <span className="hw-priority-num" style={{ color: pStyle.color }}>
+          {hw.studyPriority}
+        </span>
+        <span className="subject-emoji">{subjectEmojis[hw.subject]}</span>
+        <span
+          className="subject-badge"
+          style={{ color: subjectColor }}
+        >{hw.subject}</span>
+        <span className="task-title">
+          {hw.title}
+          {(hw.lessonLabel || hw.unitName) && (
+            <span className="hw-lesson-info">
+              {hw.lessonLabel}{hw.lessonLabel && hw.unitName ? ' ' : ''}{hw.unitName}
+            </span>
+          )}
+        </span>
+        {hw.minutes > 0 && (
+          <span className="hw-minutes-badge" title="所要時間の目安">
+            ⏱ {hw.minutes}分
+          </span>
+        )}
+        {hw.capMinutes && (
+          <span className="hw-cap-badge" title="この時間を超えたら解答を見て切り上げる">
+            上限{hw.capMinutes}分
+          </span>
+        )}
+        {pStyle && (
+          <span
+            className="task-priority-badge"
+            style={{ color: pStyle.color, borderColor: `${pStyle.color}40` }}
+          >{pStyle.label}</span>
+        )}
+      </div>
+    )
+  }
 
   const undoneReviewCount = todayReviews.filter(r => !isHomeworkDone(r.id)).length
 
@@ -93,6 +156,14 @@ function TodayAndWeekView({ tasks, testScores = [], homeworkDone, onToggleTask, 
             <span className="task-count">
               {todayHomeworkDoneCount} / {todayHomeworkCount}
             </span>
+            {todayPlan.availableMinutes > 0 && (
+              <span
+                className={`plan-minutes ${todayPlan.requiredMinutes > todayPlan.availableMinutes ? 'over' : ''}`}
+                title="必須タスクの所要時間 / 今日の持ち時間（基礎トレは別枠）"
+              >
+                ⏱ {todayPlan.requiredMinutes} / {todayPlan.availableMinutes}分
+              </span>
+            )}
           </h2>
           <span className="toggle-icon">{expandedSection === 'today' ? '▼' : '▶'}</span>
         </div>
@@ -128,51 +199,20 @@ function TodayAndWeekView({ tasks, testScores = [], homeworkDone, onToggleTask, 
             {todayHomework.length === 0 && todayReviews.length === 0 ? (
               <div className="no-tasks-message">今日の家庭学習はありません</div>
             ) : (
-              todayHomework.map(hw => {
-                const subjectColor = subjectColors[hw.subject] || '#64748b'
-                const done = isHomeworkDone(hw.id)
-                const pStyle = priorityStyles[hw.priority]
-                return (
-                  <div
-                    key={hw.id}
-                    className={`priority-task ${done ? 'completed' : ''}`}
-                    style={{
-                      borderColor: subjectColor,
-                      backgroundColor: `${subjectColor}15`,
-                      boxShadow: `0 2px 8px ${subjectColor}25`
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={done}
-                      onChange={() => onToggleHomework && onToggleHomework(hw.id)}
-                      className="task-checkbox"
-                    />
-                    <span className="hw-priority-num" style={{ color: pStyle.color }}>
-                      {hw.studyPriority}
-                    </span>
-                    <span className="subject-emoji">{subjectEmojis[hw.subject]}</span>
-                    <span
-                      className="subject-badge"
-                      style={{ color: subjectColor }}
-                    >{hw.subject}</span>
-                    <span className="task-title">
-                      {hw.title}
-                      {(hw.lessonLabel || hw.unitName) && (
-                        <span className="hw-lesson-info">
-                          {hw.lessonLabel}{hw.lessonLabel && hw.unitName ? ' ' : ''}{hw.unitName}
-                        </span>
-                      )}
-                    </span>
-                    {pStyle && (
-                      <span
-                        className="task-priority-badge"
-                        style={{ color: pStyle.color, borderColor: `${pStyle.color}40` }}
-                      >{pStyle.label}</span>
-                    )}
-                  </div>
-                )
-              })
+              <>
+                {todayPlan.required.map(renderHomeworkItem)}
+                {todayPlan.optional.length > 0 && (
+                  <>
+                    <div className="optional-header">
+                      💤 余裕があれば
+                      <span className="optional-note">
+                        持ち時間に入りきらない分（{todayPlan.optionalMinutes}分）。落としてもOK
+                      </span>
+                    </div>
+                    {todayPlan.optional.map(renderHomeworkItem)}
+                  </>
+                )}
+              </>
             )}
           </div>
         )}
@@ -201,6 +241,7 @@ function TodayAndWeekView({ tasks, testScores = [], homeworkDone, onToggleTask, 
               const doneCount =
                 hwTasks.filter(hw => isHomeworkDone(hw.id)).length +
                 reviewsForDay.filter(r => isHomeworkDone(r.id)).length
+              const dayPlan = getDayPlan(hwTasks, d)
 
               return (
                 <div key={dateStr} className={`week-day-block ${isToday ? 'is-today' : ''}`}>
@@ -209,9 +250,16 @@ function TodayAndWeekView({ tasks, testScores = [], homeworkDone, onToggleTask, 
                       {d.getMonth() + 1}/{d.getDate()}({dayName})
                       {isToday && <span className="today-badge">TODAY</span>}
                     </span>
-                    {totalCount > 0 && (
-                      <span className="week-day-count">{doneCount}/{totalCount}</span>
-                    )}
+                    <span className="week-day-meta">
+                      {dayPlan.availableMinutes > 0 && (
+                        <span className={`week-day-minutes ${dayPlan.requiredMinutes > dayPlan.availableMinutes ? 'over' : ''}`}>
+                          {dayPlan.requiredMinutes}/{dayPlan.availableMinutes}分
+                        </span>
+                      )}
+                      {totalCount > 0 && (
+                        <span className="week-day-count">{doneCount}/{totalCount}</span>
+                      )}
+                    </span>
                   </div>
                   {totalCount === 0 ? (
                     <div className="week-day-empty">-</div>
@@ -240,10 +288,11 @@ function TodayAndWeekView({ tasks, testScores = [], homeworkDone, onToggleTask, 
                         return (
                           <div
                             key={hw.id}
-                            className={`week-hw-item ${done ? 'completed' : ''}`}
+                            className={`week-hw-item ${done ? 'completed' : ''} ${hw.overflow ? 'overflow' : ''}`}
                             onClick={() => onToggleHomework && onToggleHomework(hw.id)}
+                            title={hw.overflow ? '余裕があれば（持ち時間に入りきらない分）' : `${hw.minutes}分`}
                           >
-                            <span className="week-hw-check">{done ? '✓' : '○'}</span>
+                            <span className="week-hw-check">{done ? '✓' : hw.overflow ? '💤' : '○'}</span>
                             <span className="week-hw-priority">{hw.studyPriority}</span>
                             <span
                               className="week-hw-subject"
