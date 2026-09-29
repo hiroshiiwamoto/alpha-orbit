@@ -51,18 +51,18 @@ const PROMPT = `この画像はSAPIXなど塾のテスト成績表です。「�
 {
   "testName": "テスト名",
   "grade": "X年生",
-  "fourSubjects": { "score": 得点, "totalScore": 配点, "average": "平均点", "deviation": "偏差値", "rank": 順位, "totalStudents": 受験者数 },
-  "fourSubjectsGender": { "score": 得点, "totalScore": 配点, "average": "平均点", "deviation": "偏差値", "rank": 順位, "totalStudents": 受験者数 },
-  "sansu": { "score": 得点, "totalScore": 配点, "average": "平均点", "deviation": "偏差値", "rank": 順位, "totalStudents": 受験者数 },
-  "kokugo": { "score": 得点, "totalScore": 配点, "average": "平均点", "deviation": "偏差値", "rank": 順位, "totalStudents": 受験者数 },
-  "rika": { "score": 得点, "totalScore": 配点, "average": "平均点", "deviation": "偏差値", "rank": 順位, "totalStudents": 受験者数 },
-  "shakai": { "score": 得点, "totalScore": 配点, "average": "平均点", "deviation": "偏差値", "rank": 順位, "totalStudents": 受験者数 },
-  "twoSubjects": { "score": 得点, "totalScore": 配点, "average": "平均点", "deviation": "偏差値", "rank": 順位, "totalStudents": 受験者数 },
-  "twoSubjectsGender": { "score": 得点, "totalScore": 配点, "average": "平均点", "deviation": "偏差値", "rank": 順位, "totalStudents": 受験者数 },
-  "sansuGender": { "score": 得点, "totalScore": 配点, "average": "平均点", "deviation": "偏差値", "rank": 順位, "totalStudents": 受験者数 },
-  "kokugoGender": { "score": 得点, "totalScore": 配点, "average": "平均点", "deviation": "偏差値", "rank": 順位, "totalStudents": 受験者数 },
-  "rikaGender": { "score": 得点, "totalScore": 配点, "average": "平均点", "deviation": "偏差値", "rank": 順位, "totalStudents": 受験者数 },
-  "shakaiGender": { "score": 得点, "totalScore": 配点, "average": "平均点", "deviation": "偏差値", "rank": 順位, "totalStudents": 受験者数 },
+  "fourSubjects": { "score": 得点, "totalScore": 配点, "average": 平均点, "deviation": 偏差値, "rank": 順位, "totalStudents": 受験者数 },
+  "fourSubjectsGender": { "score": 得点, "totalScore": 配点, "average": 平均点, "deviation": 偏差値, "rank": 順位, "totalStudents": 受験者数 },
+  "sansu": { "score": 得点, "totalScore": 配点, "average": 平均点, "deviation": 偏差値, "rank": 順位, "totalStudents": 受験者数 },
+  "kokugo": { "score": 得点, "totalScore": 配点, "average": 平均点, "deviation": 偏差値, "rank": 順位, "totalStudents": 受験者数 },
+  "rika": { "score": 得点, "totalScore": 配点, "average": 平均点, "deviation": 偏差値, "rank": 順位, "totalStudents": 受験者数 },
+  "shakai": { "score": 得点, "totalScore": 配点, "average": 平均点, "deviation": 偏差値, "rank": 順位, "totalStudents": 受験者数 },
+  "twoSubjects": { "score": 得点, "totalScore": 配点, "average": 平均点, "deviation": 偏差値, "rank": 順位, "totalStudents": 受験者数 },
+  "twoSubjectsGender": { "score": 得点, "totalScore": 配点, "average": 平均点, "deviation": 偏差値, "rank": 順位, "totalStudents": 受験者数 },
+  "sansuGender": { "score": 得点, "totalScore": 配点, "average": 平均点, "deviation": 偏差値, "rank": 順位, "totalStudents": 受験者数 },
+  "kokugoGender": { "score": 得点, "totalScore": 配点, "average": 平均点, "deviation": 偏差値, "rank": 順位, "totalStudents": 受験者数 },
+  "rikaGender": { "score": 得点, "totalScore": 配点, "average": 平均点, "deviation": 偏差値, "rank": 順位, "totalStudents": 受験者数 },
+  "shakaiGender": { "score": 得点, "totalScore": 配点, "average": 平均点, "deviation": 偏差値, "rank": 順位, "totalStudents": 受験者数 },
   "questionBreakdown": {
     "sansu": [
       { "number": 1, "name": "計算問題", "score": 54, "totalScore": 60, "average": 47.7 },
@@ -76,10 +76,9 @@ const PROMPT = `この画像はSAPIXなど塾のテスト成績表です。「�
   }
 }
 
-■ 小数点の扱い（重要）
-- 偏差値(deviation)と平均点(average)は必ず小数第1位まで文字列で返してください。例: "57.0", "161.9", "50.0"
-- 元の値が整数でも ".0" を付けてください。例: 57 → "57.0"
-- 得点(score)、配点(totalScore)、順位(rank)、受験者数(totalStudents)は整数のまま数値で返してください。
+■ 数値の型
+- 偏差値(deviation)と平均点(average)は表に書かれた値を数値で返してください。
+- 得点(score)、配点(totalScore)、順位(rank)、受験者数(totalStudents)は整数で返してください。
 
 ■ 科目名マッピング
 - "2科目計" / "2科目合計" → twoSubjects
@@ -97,14 +96,13 @@ const PROMPT = `この画像はSAPIXなど塾のテスト成績表です。「�
 
 ■ 例（総合成績表 パターンA: 同一行に男女別列がある場合）
 「2科目計 190/300 57.0 1252/5159 161.9 697/2826」
-→ twoSubjects: { score:190, totalScore:300, deviation:"57.0", rank:1252, totalStudents:5159, average:"161.9" }
+→ twoSubjects: { score:190, totalScore:300, deviation:57.0, rank:1252, totalStudents:5159, average:161.9 }
 → twoSubjectsGender: { rank:697, totalStudents:2826 }
 
 ■ 例（設問内容別成績表）
 算数 1 計算問題 54/60 47.7 → questionBreakdown.sansu: [{ number:1, name:"計算問題", score:54, totalScore:60, average:47.7 }]
 
-得点欄が "190 / 300" の形式は score=190, totalScore=300。
-JSONのみ返してください。説明文は不要です。`
+得点欄が "190 / 300" の形式は score=190, totalScore=300。`
 
 // ── 総評生成プロンプト ────────────────────────────────────
 
@@ -119,7 +117,6 @@ const REVIEW_PROMPT = `あなたは中学受験専門の塾講師です。以下
 
 【全体概況】（2-3文）
 - 偏差値と順位から見た全体的な出来
-- 前回比や目標との距離感（データがあれば）
 
 【科目別分析】（各科目2-3文）
 - 得点率と平均点との差
@@ -127,8 +124,7 @@ const REVIEW_PROMPT = `あなたは中学受験専門の塾講師です。以下
 - 「配点が大きいのに落とした分野」は特に指摘
 
 【要注意問題】（箇条書き）
-- 正答率50%以上なのに間違えた問題 → 「取れるはずの問題」として列挙
-- 推定失点（= 配点 - 部分点）も記載
+- 誤答一覧で【取れるはず】の付いた問題を「取れるはずの問題」として、失点とあわせて列挙
 
 【今後の学習アドバイス】（3-5項目の箇条書き）
 - 具体的に何を優先すべきか
@@ -142,6 +138,19 @@ const REVIEW_PROMPT = `あなたは中学受験専門の塾講師です。以下
 
 ■ テストデータ:
 `
+
+// 偏差値・平均点は小数第1位の文字列で保持する（57 → "57.0"）
+const DECIMAL_FIELDS = ['deviation', 'average']
+
+function normalizeDecimals(section) {
+  if (!section || typeof section !== 'object') return section
+  const out = { ...section }
+  for (const field of DECIMAL_FIELDS) {
+    const n = Number(out[field])
+    if (out[field] != null && out[field] !== '' && Number.isFinite(n)) out[field] = n.toFixed(1)
+  }
+  return out
+}
 
 /**
  * Gemini API 呼び出しで発生しうる種別を区別するためのエラークラス。
@@ -246,18 +255,25 @@ export async function extractScoresFromImage(file) {
         { text: PROMPT },
         { inline_data: { mime_type: mimeType, data: base64 } }
       ]
-    }]
+    }],
+    generationConfig: { responseMimeType: 'application/json' },
   })
 
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) {
-    throw new GeminiError('INVALID_FORMAT', '成績データを読み取れませんでした。別の画像で試してください')
-  }
+  let parsed
   try {
-    return JSON.parse(jsonMatch[0])
+    parsed = JSON.parse(text)
   } catch (err) {
     throw new GeminiError('INVALID_FORMAT', '成績データの解析に失敗しました', { cause: err })
   }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new GeminiError('INVALID_FORMAT', '成績データを読み取れませんでした。別の画像で試してください')
+  }
+  for (const [key, value] of Object.entries(parsed)) {
+    if (key !== 'testName' && key !== 'grade' && key !== 'questionBreakdown') {
+      parsed[key] = normalizeDecimals(value)
+    }
+  }
+  return parsed
 }
 
 // ── 正答率一覧表から誤答を抽出 ──────────────────────────────
@@ -300,9 +316,7 @@ const WRONG_ANSWERS_PROMPT = `この画像はSAPIXなど塾のテストの「正
 - partialScore: 部分点がある場合はその得点（数値）。完全不正解(×)の場合はnull。
 - correctRate: 正答率（小数あり）
 - points: 配点（整数）
-- problemNumber: 設問No.をそのまま文字列で（例: "1-(3)", "3-問五", "2-(1)ねん土"）
-
-JSONのみ返してください。説明文は不要です。`
+- problemNumber: 設問No.をそのまま文字列で（例: "1-(3)", "3-問五", "2-(1)ねん土"）`
 
 export async function extractWrongAnswersFromImage(file) {
   const base64 = await fileToBase64(file)
@@ -313,18 +327,20 @@ export async function extractWrongAnswersFromImage(file) {
         { text: WRONG_ANSWERS_PROMPT },
         { inline_data: { mime_type: mimeType, data: base64 } }
       ]
-    }]
+    }],
+    generationConfig: { responseMimeType: 'application/json' },
   })
 
-  const jsonMatch = text.match(/\[[\s\S]*\]/)
-  if (!jsonMatch) {
-    throw new GeminiError('INVALID_FORMAT', '誤答データを読み取れませんでした。別の画像で試してください')
-  }
+  let parsed
   try {
-    return JSON.parse(jsonMatch[0])
+    parsed = JSON.parse(text)
   } catch (err) {
     throw new GeminiError('INVALID_FORMAT', '誤答データの解析に失敗しました', { cause: err })
   }
+  if (!Array.isArray(parsed)) {
+    throw new GeminiError('INVALID_FORMAT', '誤答データを読み取れませんでした。別の画像で試してください')
+  }
+  return parsed
 }
 
 // ── 総評生成 ──────────────────────────────────────────────
@@ -384,7 +400,9 @@ export async function generateTestReview(scoreData, wrongAnswers = []) {
     dataText += '\n【誤答一覧（正答率一覧表より）】\n'
     for (const p of wrongAnswers) {
       const partial = p.partialScore != null ? `部分点${p.partialScore}` : '×'
-      dataText += `  ${p.subject} ${p.problemNumber} 配点${p.points}点 正答率${p.correctRate ?? '?'}% ${partial}\n`
+      const lost = Number(p.points || 0) - Number(p.partialScore || 0)
+      const shouldGet = Number(p.correctRate) >= 50 ? ' 【取れるはず】' : ''
+      dataText += `  ${p.subject} ${p.problemNumber} 配点${p.points}点 正答率${p.correctRate ?? '?'}% ${partial} 失点${lost}点${shouldGet}\n`
     }
   }
 
